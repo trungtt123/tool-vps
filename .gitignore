@@ -32,7 +32,7 @@ local.properties
 # node.js
 #
 Database/Profiles/
-Database/database
+# Database/database.txt
 node_modules/
 npm-debug.log
 yarn-error.log
