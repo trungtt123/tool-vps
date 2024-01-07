@@ -1,8 +1,7 @@
 const helper = require('../Action/Helper/helper');
 const { CONFIG_ROOT } = require('../const');
 
-const DATABASE_URL = __dirname + "\\database.json";
-console.log('DATABASE_URL', DATABASE_URL);
+const DATABASE_URL = __dirname + "\\database";
 async function getData(){
     try {
         let database = await helper.readFileAsync(DATABASE_URL);
