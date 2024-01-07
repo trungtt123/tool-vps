@@ -24,8 +24,6 @@ DerivedData
 # Android/IntelliJ
 #
 build/
-Database/Profiles/
-Database/database.json
 .idea
 .gradle
 local.properties
@@ -33,6 +31,8 @@ local.properties
 
 # node.js
 #
+Database/Profiles/
+# Database/database.json
 node_modules/
 npm-debug.log
 yarn-error.log
