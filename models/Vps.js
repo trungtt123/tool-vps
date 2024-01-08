@@ -8,6 +8,9 @@ const VpsSchema = new Schema({
     },
     publicUrl: {
         type: String
+    },
+    ngrokAuth: {
+        type: String
     }
 }, { timestamps: true }, { collection: 'vps' });
 module.exports = mongoose.model('vps', VpsSchema);

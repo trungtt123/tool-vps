@@ -26,6 +26,7 @@ app.get('/', async (req, res) => {
 });
 
 app.use('/v1/profile', require('./routes/profile'));
+app.use('/v1/vps', require('./routes/vps'));
 
 server.listen(7070, () => {
     console.log('listening on *:7070');
