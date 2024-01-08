@@ -191,15 +191,15 @@ router.post('/add_spotify_profile', async (req, res) => {
         });
     }
 });
-router.post('/add_group', async (req, res) => {
+router.post('/update_group', async (req, res) => {
     try {
         const { profileIds, groupId } = req.body;
         let database = await dbLocal.getData();
         let tmpProfiles = database?.profiles || [];
-        for (const profileId in profileIds) {
+        for (const profileId of profileIds) {
             const profile = tmpProfiles.find(o => o.id.toString() == profileId.toString());
             if (!profile) continue;
-            profile["groupId"] = groupId;
+            profile["groupId"] = groupId || "";
         }
         database.profiles = tmpProfiles;
         await dbLocal.updateData(database);
