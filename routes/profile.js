@@ -24,6 +24,7 @@ const command = require('./command');
 const MobileDevice = require('../models/MobileDevice');
 const dbLocal = require('../Database/database');
 const cmd = require('node-cmd');
+const moment = require('moment');
 
 router.get('/get_list_profiles', async (req, res) => {
     try {
@@ -478,39 +479,55 @@ router.post('/start_profile_with_task', async (req, res) => {
                 let dataRunProfile = await command.start_chrome_profile(profiles[i].id);
                 browser = await runLocalProfile(dataRunProfile.selenium_remote_debug_address);
                 for await (const item of listTask) {
-                    const task = helper.deepCopy(item);
-                    if (task.type === 'seq') {
-                        for await (const script of task.listScripts) {
-                            const { scriptId, config } = script;
-                            console.log('start', filePath, scriptId);
-                            let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                            console.log('running', run);
-                            console.log('end', filePath, scriptId)
+                    let run = true;
+                    const currentTime = moment(item?.time, 'HH:mm');
+                    while (run) {
+                        try {
+                            const today = moment();
+                            if (currentTime.isBefore(today)) {
+                                const task = helper.deepCopy(item);
+                                if (task.type === 'seq') {
+                                    for await (const script of task.listScripts) {
+                                        const { scriptId, config } = script;
+                                        console.log('start', filePath, scriptId);
+                                        let run = await runWithScript(browser, profileData, filePath, scriptId, config)
+                                        console.log('running', run);
+                                        console.log('end', filePath, scriptId)
+                                    }
+                                }
+                                else if (task.type === 'random') {
+                                    const arr = task.listScripts;
+                                    while (arr.length > 0) {
+                                        const randomIndex = Math.floor(Math.random() * arr.length);
+                                        const script = arr[randomIndex];
+                                        const { scriptId, config } = script;
+                                        console.log('start', filePath, scriptId);
+                                        let run = await runWithScript(browser, profileData, filePath, scriptId, config)
+                                        arr.splice(randomIndex, 1);
+                                        console.log('running', run);
+                                        console.log('end', filePath, scriptId)
+                                    }
+                                }
+                                else if (task.type === 'randomOneIn') {
+                                    const arr = task.listScripts;
+                                    const randomIndex = Math.floor(Math.random() * arr.length);
+                                    const script = arr[randomIndex];
+                                    const { scriptId, config } = script;
+                                    console.log('start', filePath, scriptId);
+                                    let run = await runWithScript(browser, profileData, filePath, scriptId, config)
+                                    console.log('running', run);
+                                    console.log('end', filePath, scriptId)
+                                }
+                                run = false;
+                            }
+                            else helper.delay(2);
+
+                        }
+                        catch (e) {
+                            run = false;
                         }
                     }
-                    else if (task.type === 'random') {
-                        const arr = task.listScripts;
-                        while (arr.length > 0) {
-                            const randomIndex = Math.floor(Math.random() * arr.length);
-                            const script = arr[randomIndex];
-                            const { scriptId, config } = script;
-                            console.log('start', filePath, scriptId);
-                            let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                            arr.splice(randomIndex, 1);
-                            console.log('running', run);
-                            console.log('end', filePath, scriptId)
-                        }
-                    }
-                    else if (task.type === 'randomOneIn') {
-                        const arr = task.listScripts;
-                        const randomIndex = Math.floor(Math.random() * arr.length);
-                        const script = arr[randomIndex];
-                        const { scriptId, config } = script;
-                        console.log('start', filePath, scriptId);
-                        let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                        console.log('running', run);
-                        console.log('end', filePath, scriptId)
-                    }
+
                 }
                 await browser?.close();
                 await command.stop_chrome_profile(profiles[i].id);
