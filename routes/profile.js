@@ -305,6 +305,9 @@ const runWithScript = async (browser, profileData, filePath, scriptId, config) =
             case 'googleNews_1':
                 await google.googleNews_1({ browser, profileData, filePath, config });
                 break;
+            case 'googleTranslate_1':
+                await google.googleTranslate_1({ browser, profileData, filePath, config });
+                break;
             case 'viewAmazon_1':
                 await amazon.viewAmazon_1({ browser, profileData, filePath, config });
                 break;
