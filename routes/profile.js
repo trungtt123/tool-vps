@@ -306,10 +306,10 @@ const runWithScript = async (browser, profileData, filePath, scriptId, config) =
                 await google.googleNews_1({ browser, profileData, filePath, config });
                 break;
             case 'viewAmazon_1':
-                await amazon.viewAmazon_1({ browser, profileData, filePath });
+                await amazon.viewAmazon_1({ browser, profileData, filePath, config });
                 break;
-            case 'viewTiktok_1':
-                await tiktok.viewTikTok_1({ browser, profileData, filePath });
+            case 'viewTikTok_1':
+                await tiktok.viewTikTok_1({ browser, profileData, filePath, config });
                 break;
             case 'viewTwitter_1':
                 await twitter.viewTwitter_1({ browser, profileData, filePath });
@@ -349,117 +349,6 @@ const runWithScript = async (browser, profileData, filePath, scriptId, config) =
         return false;
     }
 }
-router.post('/start_profile_in_group', async (req, res) => {
-    try {
-        const { groupId, listTask, thread } = req.body;
-        if (!groupId) {
-            return res.status(400).send({
-                code: "9999",
-                message: "FAILED",
-                reason: "Hãy nhập groupId"
-            });
-        }
-        if (!listTask) {
-            return res.status(400).send({
-                code: "9999",
-                message: "FAILED",
-                reason: "Hãy nhập listTask"
-            });
-        }
-        const groups = await axios.get(API_GPM_URL + "/profiles");
-        const profiles = groups.data.filter(o => o.group_name === groupName);
-        const startProfile = async (i) => {
-            let browser;
-            try {
-                const filePath = `${profiles[i].path}`;
-                const profileData = profiles[i];
-                // run profile gpm
-                let dataRunProfile = await command.start_chrome_profile(profiles[i].id);
-                browser = await runLocalProfile(dataRunProfile.selenium_remote_debug_address);
-                for await (const item of listTask) {
-                    const task = helper.deepCopy(item);
-                    if (task.type === 'seq') {
-                        for await (const script of task.listScripts) {
-                            const { scriptId, config } = script;
-                            console.log('start', filePath, scriptId);
-                            let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                            console.log('running', run);
-                            console.log('end', filePath, scriptId)
-                        }
-                    }
-                    else if (task.type === 'random') {
-                        const arr = task.listScripts;
-                        while (arr.length > 0) {
-                            const randomIndex = Math.floor(Math.random() * arr.length);
-                            const script = arr[randomIndex];
-                            const { scriptId, config } = script;
-                            console.log('start', filePath, scriptId);
-                            let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                            arr.splice(randomIndex, 1);
-                            console.log('running', run);
-                            console.log('end', filePath, scriptId)
-                        }
-                    }
-                    else if (task.type === 'randomOneIn') {
-                        const arr = task.listScripts;
-                        const randomIndex = Math.floor(Math.random() * arr.length);
-                        const script = arr[randomIndex];
-                        const { scriptId, config } = script;
-                        console.log('start', filePath, scriptId);
-                        let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                        console.log('running', run);
-                        console.log('end', filePath, scriptId)
-                    }
-                }
-                await browser?.close();
-                await command.stop_chrome_profile(profiles[i].id);
-                return i;
-            }
-            catch (e) {
-                await browser?.close();
-                await command.stop_chrome_profile(profiles[i].id);
-                console.log('Error', e);
-                return i;
-            }
-        }
-        let maxThread = Math.min(profiles.length, thread);
-        let queueThread = [];
-        let i = 0;
-        res.status(200).send({
-            code: "1000",
-            message: "OK",
-        });
-        console.log('maxThread', maxThread);
-        while (i < profiles.length) {
-            if (queueThread.length < maxThread && !queueThread.includes(i)) {
-                queueThread.push(i);
-                startProfile(i).then((indexProfile) => {
-                    const index = queueThread.indexOf(indexProfile);
-                    if (index !== -1) {
-                        queueThread.splice(index, 1);
-                    }
-                }).catch((indexProfile) => {
-                    const index = queueThread.indexOf(indexProfile);
-                    if (index !== -1) {
-                        queueThread.splice(index, 1);
-                    }
-                });
-                i++;
-            }
-            await helper.delay(2);
-            console.log(i);
-        }
-        return;
-    }
-    catch (e) {
-        console.error(e);
-        return res.status(400).send({
-            code: "9999",
-            message: "FAILED",
-            reason: "Lỗi bất định"
-        });
-    }
-});
 router.post('/start_profile_with_task', async (req, res) => {
     try {
         const { profiles, listTask, thread } = req.body;
@@ -485,14 +374,13 @@ router.post('/start_profile_with_task', async (req, res) => {
                         try {
                             const today = moment();
                             if (currentTime.isBefore(today)) {
+                                console.log('currentTime', currentTime);
+                                console.log('listScripts', item?.listScripts);
                                 const task = helper.deepCopy(item);
                                 if (task.type === 'seq') {
-                                    for await (const script of task.listScripts) {
+                                    for (const script of task.listScripts) {
                                         const { scriptId, config } = script;
-                                        console.log('start', filePath, scriptId);
-                                        let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                                        console.log('running', run);
-                                        console.log('end', filePath, scriptId)
+                                        await runWithScript(browser, profileData, filePath, scriptId, config)
                                     }
                                 }
                                 else if (task.type === 'random') {
@@ -501,11 +389,8 @@ router.post('/start_profile_with_task', async (req, res) => {
                                         const randomIndex = Math.floor(Math.random() * arr.length);
                                         const script = arr[randomIndex];
                                         const { scriptId, config } = script;
-                                        console.log('start', filePath, scriptId);
-                                        let run = await runWithScript(browser, profileData, filePath, scriptId, config)
+                                        await runWithScript(browser, profileData, filePath, scriptId, config)
                                         arr.splice(randomIndex, 1);
-                                        console.log('running', run);
-                                        console.log('end', filePath, scriptId)
                                     }
                                 }
                                 else if (task.type === 'randomOneIn') {
@@ -513,14 +398,11 @@ router.post('/start_profile_with_task', async (req, res) => {
                                     const randomIndex = Math.floor(Math.random() * arr.length);
                                     const script = arr[randomIndex];
                                     const { scriptId, config } = script;
-                                    console.log('start', filePath, scriptId);
-                                    let run = await runWithScript(browser, profileData, filePath, scriptId, config)
-                                    console.log('running', run);
-                                    console.log('end', filePath, scriptId)
+                                    await runWithScript(browser, profileData, filePath, scriptId, config)
                                 }
                                 run = false;
                             }
-                            else helper.delay(2);
+                            helper.delay(2);
 
                         }
                         catch (e) {
@@ -529,16 +411,14 @@ router.post('/start_profile_with_task', async (req, res) => {
                     }
 
                 }
-                await browser?.close();
-                await command.stop_chrome_profile(profiles[i].id);
-                return i;
+
             }
             catch (e) {
                 console.log('Error', e);
-                await browser?.close(); v
-                await command.stop_chrome_profile(profiles[i].id);
-                return i;
             }
+            await browser?.close();
+            await command.stop_chrome_profile(profiles[i].id);
+            return i;
         }
         let maxThread = Math.min(profiles.length, thread);
         let queueThread = [];

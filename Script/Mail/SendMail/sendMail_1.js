@@ -49,8 +49,8 @@ async function sendMail_1({ browser, filePath, config }) {
         await page.keyboard.press('Enter');
         await helper.delay(1000);
         // random 50% đóng tab sau khi xem
-        if (helper.randomFloat(0, 1) < 0.5) {
-            await closeActiveTab(page);
+        if (helper.randomFloat(0, 1) < 1) {
+            await navigation.closeActiveTab(page);
         }
         return true;
     }
