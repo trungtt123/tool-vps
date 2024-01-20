@@ -1,11 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const helper = require('../Action/Helper/helper');
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
-const puppeteer = require('puppeteer');
-const { FOLDER_PROFILE, API_GPM_URL, CONFIG_ROOT } = require('../const');
 const mobile_devices = require('../Constant/mobile_devices');
 
 const runLocalProfile = require('../Profile/runLocalProfile');
@@ -20,10 +15,10 @@ const yahoo = require('../Script/Yahoo/index');
 const another = require('../Script/Another/index');
 const crypto = require('../Script/Crypto/index');
 const spotify = require('../Script/Spotify/index');
+const instagram = require('../Script/Instagram/index');
 const command = require('./command');
 const MobileDevice = require('../models/MobileDevice');
 const dbLocal = require('../Database/database');
-const cmd = require('node-cmd');
 const moment = require('moment');
 
 router.get('/get_list_profiles', async (req, res) => {
@@ -313,6 +308,9 @@ const runWithScript = async (browser, profileData, filePath, scriptId, config) =
                 break;
             case 'viewTikTok_1':
                 await tiktok.viewTikTok_1({ browser, profileData, filePath, config });
+                break;
+            case 'viewInstagram':
+                await instagram.viewInstagram({ browser, profileData, config });
                 break;
             case 'viewTwitter_1':
                 await twitter.viewTwitter_1({ browser, profileData, filePath });

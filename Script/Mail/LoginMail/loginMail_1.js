@@ -5,7 +5,7 @@ const Mail = require('../../../models/Mail');
 const dbLocal = require('../../../Database/database');
 async function loginMail_1({browser, profileData, filePath}) {
     try {
-        const database = await dbLocal.getData();
+        let database = await dbLocal.getData();
         let profile = database?.profiles?.find(o => o.id.toString() === profileData.id.toString());
         if (!profile) return false;
         let process = true;
@@ -105,6 +105,8 @@ async function loginMail_1({browser, profileData, filePath}) {
             });
         }
         console.log("isLogin", isLogin);
+        database = await dbLocal.getData();
+        profile = database?.profiles?.find(o => o.id.toString() === profileData.id.toString());
         let mail = profile?.mail || {};
         mail["isLogin"] = isLogin;
         profile["mail"] = mail;
