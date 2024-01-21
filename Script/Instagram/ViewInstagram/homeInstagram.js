@@ -6,10 +6,6 @@ const dbLocal = require('../../../Database/database');
 const mouse = require('../../../Action/Mouse/mouse');
 async function homeInstagram({ browser, profileData }) {
     try {
-        let database = await dbLocal.getData();
-        let profile = database?.profiles?.find(o => o.id.toString() === profileData.id.toString());
-        if (!profile) return false;
-        let process = true;
         let page = await navigation.newTab(browser, 'https://www.instagram.com/');
         await helper.delay(20);
         const randomScroll = helper.randomInt(10, 20);
@@ -84,7 +80,7 @@ async function homeInstagram({ browser, profileData }) {
             }, (currentArticleTop));
 
         }
-
+        await navigation.closeActiveTab(page);
         return true;
     }
     catch (e) {
