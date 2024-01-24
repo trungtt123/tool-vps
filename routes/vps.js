@@ -24,18 +24,7 @@ router.get('/reset_ngrok', async (req, res) => {
 });
 router.get('/update_source_code', async (req, res) => {
     try {
-        // const { fileUrl } = req.body;
-        // console.log('fileUrl', fileUrl);
-        const fileUrl = `https://github.com/trungtt123/zip-tool-vps/raw/master/tool-vps.zip`
-        // console.log(CONFIG_ROOT);
-        const output = CONFIG_ROOT + "\\tool-vps.zip";
-        console.log('output', output);
-        request({ url: fileUrl, encoding: null }, function (err, resp, body) {
-            if (err) throw err;
-            fs.writeFile(output, body, function (err) {
-                console.log("file written!");
-            });
-        });
+        command.update_source_code();
         return res.status(200).send({
             code: "1000",
             message: "OK"

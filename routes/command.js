@@ -161,9 +161,21 @@ async function start_chrome_profile(profile_id) {
         };
     }
 }
+function update_source_code() {
+    try {
+        const data = cmd.runSync(`cd ${CONFIG_ROOT} & git pull`);
+        console.log('data', data);
+        return true;
+    }
+    catch (e) {
+        console.log(e);
+        return false;
+    }
+}
 module.exports = {
     start_chrome_profile,
     stop_chrome_profile,
     create_chrome_profile,
-    reset
+    reset,
+    update_source_code
 };
