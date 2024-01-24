@@ -318,6 +318,9 @@ const runWithScript = async (browser, profileData, filePath, scriptId, config) =
             case 'loginFacebook_1':
                 await facebook.loginFacebook_1({ browser, profileData, filePath, config });
                 break;
+            case 'viewFacebook':
+                await facebook.viewFacebook({ browser, profileData, config });
+                break;
             case 'cosmicwire_1':
                 await crypto.cosmicwire_1({ browser, filePath, config });
                 break;
