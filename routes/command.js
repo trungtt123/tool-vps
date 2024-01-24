@@ -48,15 +48,15 @@ async function checkOrResetNgrokActive() {
         // console.log(e);
     }
 }
-async function reset() {
+async function reset_ngrok() {
     await checkOrResetNgrokActive();
     await getVpsInfo();
 }
 
-reset()
-cron.schedule('0 * * * *', async () => {
-    reset()
-});
+reset_ngrok()
+// cron.schedule('0 * * * *', async () => {
+//     reset_ngrok()
+// });
 async function stop_chrome_profile(profile_id) {
     try {
         const database = await dbLocal.getData();
@@ -172,10 +172,22 @@ function update_source_code() {
         return false;
     }
 }
+function run_tool_again(){
+    try {
+        const data = cmd.runSync(`cd ${CONFIG_ROOT} & run-vps.bat`);
+        console.log('data', data);
+        return true;
+    }
+    catch (e) {
+        console.log(e);
+        return false;
+    }
+}
 module.exports = {
     start_chrome_profile,
     stop_chrome_profile,
     create_chrome_profile,
-    reset,
-    update_source_code
+    reset_ngrok,
+    update_source_code,
+    run_tool_again
 };
